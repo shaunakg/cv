@@ -24,22 +24,13 @@ jobs:
         with:
           name: ${{ env.FILE }}.pdf
           path: ./github_artifacts
-  deploy:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          path: github_artifacts
-      - name: move
-        run: mkdir -p github_deploy && mv github_artifacts/*/* github_deploy
-      - name: deploy on orphan branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./github_deploy
-          publish_branch: build
-          force_orphan: true
-          enable_jekyll: true
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Upload pdf to S3
+        run: |
+          aws s3 cp ./github_artifacts/${{ env.FILE }}.pdf s3://${{ secrets.S3_BUCKET }}/cv.pdf --endpoint ${{ secrets.AWS_S3_ENDPOINT }}
+
