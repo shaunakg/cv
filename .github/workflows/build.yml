@@ -24,13 +24,11 @@ jobs:
         with:
           name: ${{ env.FILE }}.pdf
           path: ./github_artifacts
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
       - name: Upload pdf to S3
         run: |
           aws s3 cp ./github_artifacts/${{ env.FILE }}.pdf s3://${{ secrets.S3_BUCKET }}/cv.pdf --endpoint ${{ secrets.AWS_S3_ENDPOINT }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
 
